@@ -1,0 +1,18 @@
+# Rust
+target/
+Cargo.lock
+
+# Node
+node_modules/
+frontend/.svelte-kit/
+frontend/build/
+frontend/.env
+
+# Uploads / test files
+*.docx
+!tests/fixtures/*.docx
+
+# Editor
+.vscode/
+.idea/
+*.swp

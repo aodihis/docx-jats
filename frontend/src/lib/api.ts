@@ -1,0 +1,21 @@
+import type { ConvertResponse } from './types';
+
+const API_BASE = import.meta.env.VITE_API_BASE ?? '/api';
+
+export async function convertDocx(file: File): Promise<ConvertResponse> {
+  const form = new FormData();
+  form.append('file', file);
+
+  const res = await fetch(`${API_BASE}/convert`, {
+    method: 'POST',
+    body: form
+  });
+
+  const data = await res.json();
+
+  if (!res.ok || !data.success) {
+    throw new Error(data.error ?? `Server error: ${res.status}`);
+  }
+
+  return data as ConvertResponse;
+}
