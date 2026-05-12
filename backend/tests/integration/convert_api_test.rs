@@ -5,7 +5,7 @@ use std::io::{Cursor, Write};
 use zip::write::SimpleFileOptions;
 
 fn build_router() -> axum::Router {
-    docx_jast_backend::api::routes::build_router()
+    docx_jats_backend::api::routes::build_router()
 }
 
 /// Build a minimal valid .docx byte vector in memory.

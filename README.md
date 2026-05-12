@@ -1,4 +1,4 @@
-# docx-jast
+# docx-jats
 
 Convert Microsoft Word (`.docx`) research manuscripts into JATS XML.
 
@@ -133,7 +133,7 @@ curl -X POST http://localhost:3001/convert \
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `RUST_LOG` | `docx_jast_backend=debug,tower_http=info` | Backend log level (tracing directives) |
+| `RUST_LOG` | `docx_jats_backend=debug,tower_http=info` | Backend log level (tracing directives) |
 | `LOG_FORMAT` | `pretty` | Log format: `pretty` (colored, dev) or `json` (structured, production) |
 | `VITE_API_BASE` | `http://localhost:3001` | Backend URL (full, not proxied — SvelteKit intercepts `/api/*` before Vite proxy) |
 

@@ -8,5 +8,6 @@ pub fn build_router() -> Router {
 }
 
 async fn health() -> &'static str {
+    tracing::debug!("incoming GET /health");
     "ok"
 }

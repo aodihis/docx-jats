@@ -1,0 +1,25 @@
+meta {
+  name: Convert - invalid file (not a DOCX)
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{base_url}}/convert
+  body: multipart-form
+  auth: none
+}
+
+body:multipart-form {
+  file: @file(../fixtures/not-a-docx.txt)
+}
+
+tests {
+  test("status is 4xx", function() {
+    expect(res.status).to.be.within(400, 499);
+  });
+
+  test("error message is present", function() {
+    expect(res.body.error).to.be.a("string");
+  });
+}

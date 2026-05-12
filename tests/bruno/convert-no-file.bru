@@ -1,0 +1,21 @@
+meta {
+  name: Convert - missing file field
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{base_url}}/convert
+  body: multipart-form
+  auth: none
+}
+
+body:multipart-form {
+  other_field: not-a-docx
+}
+
+tests {
+  test("status is 4xx", function() {
+    expect(res.status).to.be.within(400, 499);
+  });
+}

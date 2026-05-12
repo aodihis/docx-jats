@@ -1,4 +1,4 @@
-use docx_jast_backend::api;
+use docx_jats_backend::api;
 use std::net::SocketAddr;
 use tower_http::{cors::{Any, CorsLayer}, trace::TraceLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -25,7 +25,7 @@ async fn main() {
 
 fn init_tracing() {
     let filter = tracing_subscriber::EnvFilter::try_from_default_env()
-        .unwrap_or_else(|_| "docx_jast_backend=debug,tower_http=info".into());
+        .unwrap_or_else(|_| "docx_jats_backend=debug,tower_http=info".into());
 
     let format = std::env::var("LOG_FORMAT").unwrap_or_default();
 

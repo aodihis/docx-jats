@@ -1,6 +1,6 @@
 use axum::{extract::Multipart, Json};
 use serde::Serialize;
-use tracing::instrument;
+use tracing::{debug, instrument};
 
 use crate::{
     error::AppError,
@@ -21,12 +21,14 @@ pub struct ConvertResponse {
 
 #[instrument(skip(multipart))]
 pub async fn convert_handler(mut multipart: Multipart) -> Result<Json<ConvertResponse>, AppError> {
-    // Extract file bytes from multipart field named "file"
+    debug!("incoming POST /convert");
+
     let mut file_bytes: Option<Vec<u8>> = None;
 
     while let Some(field) = multipart.next_field().await? {
         if field.name() == Some("file") {
             let data = field.bytes().await?;
+            debug!(bytes = data.len(), "file field received");
             file_bytes = Some(data.to_vec());
             break;
         }

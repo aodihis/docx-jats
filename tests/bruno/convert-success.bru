@@ -1,0 +1,42 @@
+meta {
+  name: Convert DOCX (success)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base_url}}/convert
+  body: multipart-form
+  auth: none
+}
+
+body:multipart-form {
+  file: @file(../fixtures/journalstack_test_article.docx)
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.status).to.equal(200);
+  });
+
+  test("success flag is true", function() {
+    expect(res.body.success).to.equal(true);
+  });
+
+  test("xml is non-empty string", function() {
+    expect(res.body.xml).to.be.a("string");
+    expect(res.body.xml.length).to.be.above(0);
+  });
+
+  test("xml starts with JATS root", function() {
+    expect(res.body.xml).to.include("<article");
+  });
+
+  test("warnings is an array", function() {
+    expect(res.body.warnings).to.be.an("array");
+  });
+
+  test("metadata is present", function() {
+    expect(res.body.metadata).to.be.an("object");
+  });
+}

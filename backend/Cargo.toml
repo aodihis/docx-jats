@@ -1,14 +1,14 @@
 [package]
-name = "docx-jast-backend"
+name = "docx-jats-backend"
 version = "0.1.0"
 edition = "2021"
 
 [lib]
-name = "docx_jast_backend"
+name = "docx_jats_backend"
 path = "src/lib.rs"
 
 [[bin]]
-name = "docx-jast-backend"
+name = "docx-jats-backend"
 path = "src/main.rs"
 
 [dependencies]
