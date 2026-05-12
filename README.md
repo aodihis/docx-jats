@@ -135,7 +135,7 @@ curl -X POST http://localhost:3001/convert \
 |----------|---------|-------------|
 | `RUST_LOG` | `docx_jast_backend=debug,tower_http=info` | Backend log level (tracing directives) |
 | `LOG_FORMAT` | `pretty` | Log format: `pretty` (colored, dev) or `json` (structured, production) |
-| `VITE_API_BASE` | `/api` | Frontend API prefix |
+| `VITE_API_BASE` | `http://localhost:3001` | Backend URL (full, not proxied — SvelteKit intercepts `/api/*` before Vite proxy) |
 
 Copy `.env.example` to `.env` in the `frontend/` directory if you need to override the API base URL.
 
