@@ -133,7 +133,8 @@ curl -X POST http://localhost:3001/convert \
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `RUST_LOG` | `docx_jast_backend=debug` | Backend log level |
+| `RUST_LOG` | `docx_jast_backend=debug,tower_http=info` | Backend log level (tracing directives) |
+| `LOG_FORMAT` | `pretty` | Log format: `pretty` (colored, dev) or `json` (structured, production) |
 | `VITE_API_BASE` | `/api` | Frontend API prefix |
 
 Copy `.env.example` to `.env` in the `frontend/` directory if you need to override the API base URL.
