@@ -1,0 +1,10 @@
+# Root .dockerignore — applies to the backend build (context: .)
+.git/
+.github/
+frontend/
+nginx/
+tests/
+target/
+.env*
+*.md
+docker-compose*.yml

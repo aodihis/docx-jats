@@ -295,6 +295,9 @@
   <footer class="border-t border-slate-700/40 mt-16">
     <div class="max-w-4xl mx-auto px-6 py-6 text-center text-xs text-slate-500">
       docx-jats · DOCX to JATS XML converter
+      <span class="mx-2 text-slate-600">·</span>
+      To add feedback or found any issue please email
+      <a href="mailto:aodihis@gmail.com" class="text-indigo-400 hover:text-indigo-300 transition-colors">aodihis@gmail.com</a>
     </div>
   </footer>
 </div>
