@@ -14,7 +14,7 @@ Convert Microsoft Word (`.docx`) research manuscripts into JATS XML.
 
 ```
 docx-jast/
-├── backend/   # Rust / Axum API server (port 3001)
+├── backend/   # Rust / Axum API server (port 5505)
 └── frontend/  # SvelteKit UI (port 5173)
 ```
 
@@ -52,7 +52,7 @@ cd backend
 cargo run
 ```
 
-The API will be available at `http://localhost:3001`.
+The API will be available at `http://localhost:5505`.
 
 **Terminal 2 — frontend**
 
@@ -63,7 +63,7 @@ npm run dev
 
 Open `http://localhost:5173` in your browser.
 
-The Vite dev server proxies `/api/*` to `http://localhost:3001`, so no CORS configuration is needed in development.
+The Vite dev server proxies `/api/*` to `http://localhost:5505`, so no CORS configuration is needed in development.
 
 ## Running tests
 
@@ -108,7 +108,7 @@ Upload a `.docx` file and receive JATS XML.
 **Request** — multipart/form-data with a field named `file`.
 
 ```bash
-curl -X POST http://localhost:3001/convert \
+curl -X POST http://localhost:5505/convert \
   -F "file=@your-manuscript.docx"
 ```
 
@@ -135,7 +135,7 @@ curl -X POST http://localhost:3001/convert \
 |----------|---------|-------------|
 | `RUST_LOG` | `docx_jats_backend=debug,tower_http=info` | Backend log level (tracing directives) |
 | `LOG_FORMAT` | `pretty` | Log format: `pretty` (colored, dev) or `json` (structured, production) |
-| `VITE_API_BASE` | `http://localhost:3001` | Backend URL (full, not proxied — SvelteKit intercepts `/api/*` before Vite proxy) |
+| `VITE_API_BASE` | `http://localhost:5505` | Backend URL (full, not proxied — SvelteKit intercepts `/api/*` before Vite proxy) |
 
 Copy `.env.example` to `.env` in the `frontend/` directory if you need to override the API base URL.
 

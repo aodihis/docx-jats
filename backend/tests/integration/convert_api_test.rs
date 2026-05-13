@@ -1,5 +1,4 @@
-use axum::body::Body;
-use axum::http::{Request, StatusCode};
+use axum::http::{StatusCode};
 use axum_test::TestServer;
 use std::io::{Cursor, Write};
 use zip::write::SimpleFileOptions;

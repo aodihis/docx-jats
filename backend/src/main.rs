@@ -16,7 +16,11 @@ async fn main() {
         .layer(TraceLayer::new_for_http())
         .layer(cors);
 
-    let addr = SocketAddr::from(([0, 0, 0, 0], 3001));
+    let port: u16 = std::env::var("PORT")
+        .unwrap_or_else(|_| "5505".to_string())
+        .parse()
+        .expect("PORT must be a valid number");
+    let addr = SocketAddr::from(([0, 0, 0, 0], port));
     tracing::info!(address = %addr, "server started");
 
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();

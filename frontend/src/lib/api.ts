@@ -1,7 +1,7 @@
 import type { ConvertResponse } from './types';
 import { API_ROUTES } from './api-contract';
 
-const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:3001';
+const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:5505';
 
 export async function convertDocx(file: File): Promise<ConvertResponse> {
   const form = new FormData();
