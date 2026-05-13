@@ -16,3 +16,4 @@ frontend/.env
 .vscode/
 .idea/
 *.swp
+.github/hooks/context-mode.json

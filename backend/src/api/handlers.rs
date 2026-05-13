@@ -1,6 +1,7 @@
 use axum::{extract::Multipart, Json};
 use serde::Serialize;
 use tracing::{debug, instrument};
+use utoipa::ToSchema;
 
 use crate::{
     error::AppError,
@@ -11,7 +12,7 @@ use crate::{
     xml,
 };
 
-#[derive(Serialize)]
+#[derive(Serialize, ToSchema)]
 pub struct ConvertResponse {
     pub success: bool,
     pub xml: String,
@@ -19,6 +20,18 @@ pub struct ConvertResponse {
     pub metadata: DocumentMetadata,
 }
 
+#[utoipa::path(
+    post,
+    path = "/convert",
+    request_body(description = "Multipart form-data with a `file` field containing the .docx file."),
+    responses(
+        (status = 200, description = "Successful conversion", body = ConvertResponse),
+        (status = 400, description = "Missing `file` field in multipart body"),
+        (status = 422, description = "File is not a valid DOCX"),
+        (status = 500, description = "Internal server error"),
+    ),
+    tag = "conversion"
+)]
 #[instrument(skip(multipart))]
 pub async fn convert_handler(mut multipart: Multipart) -> Result<Json<ConvertResponse>, AppError> {
     debug!("incoming POST /convert");
