@@ -103,14 +103,14 @@ fn multipart_body(docx_bytes: &[u8]) -> (String, Vec<u8>) {
 
 #[tokio::test]
 async fn test_health_endpoint() {
-    let server = TestServer::new(build_router()).unwrap();
+    let server = TestServer::new(build_router());
     let response = server.get("/health").await;
     assert_eq!(response.status_code(), StatusCode::OK);
 }
 
 #[tokio::test]
 async fn test_convert_minimal_docx_success() {
-    let server = TestServer::new(build_router()).unwrap();
+    let server = TestServer::new(build_router());
     let docx = make_minimal_docx(&realistic_document_xml());
     let (content_type, body) = multipart_body(&docx);
 
@@ -130,7 +130,7 @@ async fn test_convert_minimal_docx_success() {
 
 #[tokio::test]
 async fn test_convert_returns_metadata() {
-    let server = TestServer::new(build_router()).unwrap();
+    let server = TestServer::new(build_router());
     let docx = make_minimal_docx(&realistic_document_xml());
     let (content_type, body) = multipart_body(&docx);
 
@@ -147,7 +147,7 @@ async fn test_convert_returns_metadata() {
 
 #[tokio::test]
 async fn test_convert_invalid_file_returns_error() {
-    let server = TestServer::new(build_router()).unwrap();
+    let server = TestServer::new(build_router());
     let (content_type, body) = multipart_body(b"this is definitely not a docx file");
 
     let response = server
@@ -164,7 +164,7 @@ async fn test_convert_invalid_file_returns_error() {
 
 #[tokio::test]
 async fn test_convert_missing_file_field_returns_error() {
-    let server = TestServer::new(build_router()).unwrap();
+    let server = TestServer::new(build_router());
 
     // Empty multipart with no "file" field
     let boundary = "TestBoundary1234";
@@ -182,7 +182,7 @@ async fn test_convert_missing_file_field_returns_error() {
 
 #[tokio::test]
 async fn test_warnings_returned_for_ambiguous_doc() {
-    let server = TestServer::new(build_router()).unwrap();
+    let server = TestServer::new(build_router());
     let docx = make_minimal_docx(&ambiguous_document_xml());
     let (content_type, body) = multipart_body(&docx);
 
