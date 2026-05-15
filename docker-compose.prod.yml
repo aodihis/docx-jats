@@ -1,0 +1,46 @@
+services:
+  backend:
+    image: ${BACKEND_IMAGE}
+    environment:
+      PORT: "5505"
+      RUST_LOG: "docx_jats_backend=info,tower_http=info"
+      LOG_FORMAT: "json"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:5505/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - traefik
+    labels:
+      - traefik.enable=true
+      - "traefik.http.routers.jast-backend.rule=Host(`jats.aodihis.com`) && (PathPrefix(`/health`) || PathPrefix(`/convert`))"
+      - traefik.http.routers.jast-backend.entrypoints=websecure
+      - traefik.http.routers.jast-backend.tls.certresolver=letsencrypt
+      - traefik.http.routers.jast-backend.priority=10
+      - traefik.http.services.jast-backend.loadbalancer.server.port=5505
+
+  frontend:
+    image: ${FRONTEND_IMAGE}
+    environment:
+      PORT: "3000"
+      NODE_ENV: "production"
+      ORIGIN: "https://jats.aodihis.com"
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - traefik
+    labels:
+      - traefik.enable=true
+      - "traefik.http.routers.jast-frontend.rule=Host(`jats.aodihis.com`)"
+      - traefik.http.routers.jast-frontend.entrypoints=websecure
+      - traefik.http.routers.jast-frontend.tls.certresolver=letsencrypt
+      - traefik.http.services.jast-frontend.loadbalancer.server.port=3000
+
+networks:
+  traefik:
+    external: true

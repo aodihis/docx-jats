@@ -1,5 +1,5 @@
 # ── Stage 1: dependency cache (cargo-chef) ───────────────────────────────────
-FROM rust:1.82-slim-bookworm AS chef
+FROM rust:1.88-slim-bookworm AS chef
 RUN cargo install cargo-chef --locked
 WORKDIR /app
 
@@ -21,7 +21,7 @@ RUN cargo build --release --bin docx-jats-backend
 # ── Stage 3: minimal runtime image ───────────────────────────────────────────
 FROM debian:bookworm-slim AS runtime
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ca-certificates \
+    && apt-get install -y --no-install-recommends ca-certificates curl \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY --from=builder /app/target/release/docx-jats-backend ./docx-jats-backend
