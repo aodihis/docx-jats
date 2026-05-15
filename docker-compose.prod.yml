@@ -21,7 +21,7 @@ services:
       - "traefik.http.routers.jast-backend.rule=Host(`jats.aodihis.com`) && (PathPrefix(`/health`) || PathPrefix(`/convert`))"
       - traefik.http.routers.jast-backend.entrypoints=websecure
       - traefik.http.routers.jast-backend.tls.certresolver=letsencrypt
-      - traefik.http.routers.jast-backend.priority=10
+      - traefik.http.routers.jast-backend.priority=100
       - traefik.http.services.jast-backend.loadbalancer.server.port=5505
 
   frontend:
