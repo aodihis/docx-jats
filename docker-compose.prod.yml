@@ -5,6 +5,8 @@ services:
       PORT: "5505"
       RUST_LOG: "docx_jats_backend=info,tower_http=info"
       LOG_FORMAT: "json"
+    security_opt:
+      - no-new-privileges:true
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:5505/health"]
@@ -28,6 +30,8 @@ services:
       PORT: "3000"
       NODE_ENV: "production"
       ORIGIN: "https://jats.aodihis.com"
+    security_opt:
+      - no-new-privileges:true
     restart: unless-stopped
     depends_on:
       backend:

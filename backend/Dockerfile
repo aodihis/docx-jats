@@ -21,12 +21,16 @@ RUN cargo build --release --bin docx-jats-backend
 # ── Stage 3: minimal runtime image ───────────────────────────────────────────
 FROM debian:bookworm-slim AS runtime
 RUN apt-get update \
+    && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends ca-certificates curl \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --system app && useradd --system --gid app app
 WORKDIR /app
 COPY --from=builder /app/target/release/docx-jats-backend ./docx-jats-backend
+RUN chown app:app ./docx-jats-backend
 ENV PORT=5505
 ENV RUST_LOG=docx_jats_backend=info,tower_http=info
 ENV LOG_FORMAT=json
 EXPOSE 5505
+USER app
 CMD ["./docx-jats-backend"]
