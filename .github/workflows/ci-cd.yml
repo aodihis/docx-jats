@@ -102,7 +102,7 @@ jobs:
           envs: BACKEND_IMAGE,FRONTEND_IMAGE,GHCR_TOKEN,GITHUB_ACTOR
           script: |
             set -e
-            cd /opt/apps/docx-jast
+            cd /opt/apps/docx-jats
             git pull
             printf 'BACKEND_IMAGE=%s\nFRONTEND_IMAGE=%s\n' "$BACKEND_IMAGE" "$FRONTEND_IMAGE" > .env
             chmod 600 .env
