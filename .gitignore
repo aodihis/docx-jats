@@ -10,7 +10,7 @@ frontend/.env
 
 # Uploads / test files
 *.docx
-!tests/fixtures/*.docx
+!backend/tests/fixtures/*.docx
 
 # Editor
 .vscode/
