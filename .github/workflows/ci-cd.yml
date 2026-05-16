@@ -88,6 +88,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Copy compose file to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "docker-compose.prod.yml"
+          target: "/opt/apps/docx-jats"
+
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1
         env:
@@ -102,8 +111,8 @@ jobs:
           envs: BACKEND_IMAGE,FRONTEND_IMAGE,GHCR_TOKEN,GITHUB_ACTOR
           script: |
             set -e
+            mkdir -p /opt/apps/docx-jats
             cd /opt/apps/docx-jats
-            git pull
             printf 'BACKEND_IMAGE=%s\nFRONTEND_IMAGE=%s\n' "$BACKEND_IMAGE" "$FRONTEND_IMAGE" > .env
             chmod 600 .env
             echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
