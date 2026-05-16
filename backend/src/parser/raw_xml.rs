@@ -1,4 +1,4 @@
-use quick_xml::{events::Event, Reader};
+use quick_xml::{escape::unescape, events::Event, Reader};
 
 use crate::error::AppError;
 
@@ -28,7 +28,10 @@ pub struct ParsedXml {
 ///   </w:body>
 pub fn parse_document_xml(xml: &str) -> Result<ParsedXml, AppError> {
     let mut reader = Reader::from_str(xml);
-    reader.config_mut().trim_text(true);
+    // Do NOT trim_text — it trims each event independently and would collapse
+    // the space around entity-split text (e.g. "B., " + " Zibbitova" from &amp;).
+    // We only capture text inside <w:t> (guarded by in_text), so structural
+    // whitespace-only events are already ignored by the state machine.
 
     let mut paragraphs: Vec<Paragraph> = Vec::new();
 
@@ -84,7 +87,9 @@ pub fn parse_document_xml(xml: &str) -> Result<ParsedXml, AppError> {
                 }
             }
             Ok(Event::Text(ref e)) if in_text => {
-                current_text.push_str(&e.decode().unwrap_or_default());
+                let raw = e.decode().unwrap_or_default();
+                let s = unescape(&raw).unwrap_or_else(|_| raw.clone());
+                current_text.push_str(&s);
             }
             Ok(Event::Eof) => break,
             Err(e) => return Err(AppError::XmlError(e)),

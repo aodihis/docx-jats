@@ -6,4 +6,6 @@ pub mod zip;
 pub struct RawDocx {
     pub document_xml: String,
     pub styles_xml: Option<String>,
+    /// docProps/core.xml — contains Dublin Core metadata (creator, title, …)
+    pub core_xml: Option<String>,
 }

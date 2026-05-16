@@ -27,7 +27,7 @@ pub fn generate_jats(doc: &Document) -> Result<String, AppError> {
     writer.write_event(Event::End(BytesEnd::new("article")))?;
 
     let xml_bytes = writer.into_inner().into_inner();
-    Ok(String::from_utf8(xml_bytes).map_err(|e| AppError::InvalidDocx(e.to_string()))?)
+    String::from_utf8(xml_bytes).map_err(|e| AppError::InvalidDocx(e.to_string()))
 }
 
 fn write_front(w: &mut Writer<Cursor<Vec<u8>>>, doc: &Document) -> Result<(), AppError> {
@@ -41,6 +41,11 @@ fn write_front(w: &mut Writer<Cursor<Vec<u8>>>, doc: &Document) -> Result<(), Ap
         w.write_event(Event::Text(BytesText::new(title)))?;
     }
     w.write_event(Event::End(BytesEnd::new("article-title")))?;
+    if let Some(subtitle) = &doc.subtitle {
+        w.write_event(Event::Start(BytesStart::new("subtitle")))?;
+        w.write_event(Event::Text(BytesText::new(subtitle)))?;
+        w.write_event(Event::End(BytesEnd::new("subtitle")))?;
+    }
     w.write_event(Event::End(BytesEnd::new("title-group")))?;
 
     // <contrib-group>
@@ -140,6 +145,7 @@ mod tests {
     fn minimal_doc() -> Document {
         Document {
             title: Some("Test Title".into()),
+            subtitle: None,
             authors: vec![],
             abstract_text: Some("Test abstract.".into()),
             sections: vec![Section {
@@ -194,5 +200,30 @@ mod tests {
         assert!(xml.contains("<ref-list>"));
         assert!(xml.contains(r#"id="ref-1""#));
         assert!(xml.contains("Smith (2020)."));
+    }
+
+    #[test]
+    fn test_subtitle_emitted_inside_title_group() {
+        // JATS allows <subtitle> inside <title-group> — verify it is generated.
+        let mut doc = minimal_doc();
+        doc.subtitle = Some("A Descriptive Subtitle".into());
+        let xml = generate_jats(&doc).unwrap();
+        assert!(xml.contains("<subtitle>"), "expected <subtitle> element in XML");
+        assert!(xml.contains("A Descriptive Subtitle"));
+        // Must appear inside <title-group>
+        let title_group_pos = xml.find("<title-group>").expect("<title-group> missing");
+        let title_group_end = xml.find("</title-group>").expect("</title-group> missing");
+        let subtitle_pos = xml.find("<subtitle>").expect("<subtitle> missing");
+        assert!(
+            subtitle_pos > title_group_pos && subtitle_pos < title_group_end,
+            "<subtitle> must be inside <title-group>"
+        );
+    }
+
+    #[test]
+    fn test_no_subtitle_element_when_absent() {
+        let doc = minimal_doc(); // subtitle: None
+        let xml = generate_jats(&doc).unwrap();
+        assert!(!xml.contains("<subtitle>"), "<subtitle> must not appear when subtitle is None");
     }
 }

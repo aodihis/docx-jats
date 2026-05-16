@@ -1,5 +1,6 @@
-use axum::http::{StatusCode};
+use axum::http::StatusCode;
 use axum_test::TestServer;
+use serde_json::json;
 use std::io::{Cursor, Write};
 use zip::write::SimpleFileOptions;
 
@@ -195,4 +196,120 @@ async fn test_warnings_returned_for_ambiguous_doc() {
     let json: serde_json::Value = response.json();
     let warnings = json["warnings"].as_array().unwrap();
     assert!(!warnings.is_empty(), "expected warnings for ambiguous document");
+}
+
+#[tokio::test]
+async fn test_convert_returns_document_content() {
+    let server = TestServer::new(build_router());
+    let docx = make_minimal_docx(&realistic_document_xml());
+    let (content_type, body) = multipart_body(&docx);
+
+    let response = server
+        .post("/convert")
+        .content_type(&content_type)
+        .bytes(body.into())
+        .await;
+
+    assert_eq!(response.status_code(), StatusCode::OK);
+    let json: serde_json::Value = response.json();
+    assert!(json["document"].is_object(), "response must include 'document' field");
+    assert!(json["document"]["sections"].is_array());
+    assert!(json["document"]["references"].is_array());
+    assert!(json["document"]["authors"].is_array());
+}
+
+// ── /regenerate tests ─────────────────────────────────────────────────────────
+
+#[tokio::test]
+async fn test_regenerate_with_title() {
+    let server = TestServer::new(build_router());
+
+    let body = json!({
+        "document": {
+            "title": "My Edited Title",
+            "authors": [],
+            "abstract_text": null,
+            "sections": [],
+            "references": []
+        }
+    });
+
+    let response = server
+        .post("/regenerate")
+        .json(&body)
+        .await;
+
+    assert_eq!(response.status_code(), StatusCode::OK);
+    let json: serde_json::Value = response.json();
+    assert_eq!(json["success"], true);
+    let xml = json["xml"].as_str().unwrap();
+    assert!(xml.contains("My Edited Title"), "XML must contain the edited title");
+    assert!(xml.contains("<article"), "XML must be a valid JATS article");
+}
+
+#[tokio::test]
+async fn test_regenerate_empty_document() {
+    let server = TestServer::new(build_router());
+
+    let body = json!({
+        "document": {
+            "title": null,
+            "authors": [],
+            "abstract_text": null,
+            "sections": [],
+            "references": []
+        }
+    });
+
+    let response = server
+        .post("/regenerate")
+        .json(&body)
+        .await;
+
+    assert_eq!(response.status_code(), StatusCode::OK);
+    let json: serde_json::Value = response.json();
+    assert_eq!(json["success"], true);
+    assert!(!json["xml"].as_str().unwrap_or("").is_empty());
+}
+
+#[tokio::test]
+async fn test_regenerate_updates_authors() {
+    let server = TestServer::new(build_router());
+
+    let body = json!({
+        "document": {
+            "title": "Test",
+            "authors": [
+                { "name": "Alice Smith" },
+                { "name": "Bob Jones" }
+            ],
+            "abstract_text": null,
+            "sections": [],
+            "references": []
+        }
+    });
+
+    let response = server
+        .post("/regenerate")
+        .json(&body)
+        .await;
+
+    assert_eq!(response.status_code(), StatusCode::OK);
+    let json: serde_json::Value = response.json();
+    let xml = json["xml"].as_str().unwrap();
+    assert!(xml.contains("Alice Smith"), "XML must contain first author");
+    assert!(xml.contains("Bob Jones"), "XML must contain second author");
+}
+
+#[tokio::test]
+async fn test_regenerate_invalid_body() {
+    let server = TestServer::new(build_router());
+
+    let response = server
+        .post("/regenerate")
+        .content_type("application/json")
+        .bytes(b"{ not valid json }".as_ref().into())
+        .await;
+
+    assert_ne!(response.status_code(), StatusCode::OK);
 }

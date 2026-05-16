@@ -1,6 +1,7 @@
 use crate::parser::raw_xml::ParsedXml;
 
 const TITLE_STYLES: &[&str] = &["Title", "Heading1", "1"];
+const SUBTITLE_STYLES: &[&str] = &["Subtitle", "subtitle"];
 
 /// Extract the document title.
 ///
@@ -11,10 +12,10 @@ pub fn extract_title(parsed: &ParsedXml, warnings: &mut Vec<String>) -> Option<S
     // Preferred: recognised title style
     for para in &parsed.paragraphs {
         if let Some(style) = &para.style {
-            if TITLE_STYLES.iter().any(|s| style.eq_ignore_ascii_case(s)) {
-                if !para.text.is_empty() {
-                    return Some(para.text.clone());
-                }
+            if TITLE_STYLES.iter().any(|s| style.eq_ignore_ascii_case(s))
+                && !para.text.is_empty()
+            {
+                return Some(para.text.clone());
             }
         }
     }
@@ -31,6 +32,18 @@ pub fn extract_title(parsed: &ParsedXml, warnings: &mut Vec<String>) -> Option<S
     }
 
     None
+}
+
+/// Extract the document subtitle — a paragraph styled "Subtitle" immediately
+/// after (or near) the title. Returns `None` if no subtitle style is found.
+pub fn extract_subtitle(parsed: &ParsedXml) -> Option<String> {
+    parsed.paragraphs.iter().find(|p| {
+        p.style
+            .as_deref()
+            .map(|s| SUBTITLE_STYLES.iter().any(|st| s.eq_ignore_ascii_case(st)))
+            .unwrap_or(false)
+            && !p.text.is_empty()
+    }).map(|p| p.text.clone())
 }
 
 fn truncate(s: &str, max: usize) -> &str {
@@ -89,5 +102,32 @@ mod tests {
         let p = parsed(vec![]);
         let mut w = vec![];
         assert_eq!(extract_title(&p, &mut w), None);
+    }
+
+    #[test]
+    fn test_subtitle_extracted_when_styled() {
+        let p = parsed(vec![
+            make(Some("Title"), "Main Title"),
+            make(Some("Subtitle"), "A Longer Subtitle Phrase"),
+        ]);
+        assert_eq!(
+            extract_subtitle(&p),
+            Some("A Longer Subtitle Phrase".into())
+        );
+    }
+
+    #[test]
+    fn test_subtitle_none_when_absent() {
+        let p = parsed(vec![
+            make(Some("Title"), "Main Title"),
+            make(Some("Normal"), "Body paragraph"),
+        ]);
+        assert_eq!(extract_subtitle(&p), None);
+    }
+
+    #[test]
+    fn test_subtitle_case_insensitive_style() {
+        let p = parsed(vec![make(Some("SUBTITLE"), "Sub")]);
+        assert_eq!(extract_subtitle(&p), Some("Sub".into()));
     }
 }

@@ -159,6 +159,17 @@ async fn test_works_cited_heading_alias() {
         meta["section_count"].as_u64().unwrap_or(0) >= 6,
         "expected at least 6 body sections"
     );
+    // Author line "Snazzleton, A., Frumpleston, B., & Zibbitova, C." must be
+    // split into 3 individual authors by the APA heuristic.
+    assert_eq!(
+        meta["author_count"], 3,
+        "expected 3 authors from APA-format positional line"
+    );
+    let doc = &json["document"];
+    let authors = doc["authors"].as_array().expect("authors must be an array");
+    assert_eq!(authors[0]["name"], "Snazzleton, A.", "first author name mismatch");
+    assert_eq!(authors[1]["name"], "Frumpleston, B.", "second author name mismatch");
+    assert_eq!(authors[2]["name"], "Zibbitova, C.", "third author name mismatch");
 
     let xml = json["xml"].as_str().unwrap();
     assert!(xml.contains("<ref-list>"));

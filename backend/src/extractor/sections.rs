@@ -19,13 +19,36 @@ const SKIP_HEADINGS: &[&str] = &["Abstract", "abstract", "Title", "title"];
 /// Each heading-style paragraph starts a new section. Paragraphs under a
 /// heading are collected as `body`. If there are no headings, a single
 /// unnamed section holds all body text.
-pub fn extract_sections(parsed: &ParsedXml, warnings: &mut Vec<String>) -> Vec<Section> {
+pub fn extract_sections(
+    parsed: &ParsedXml,
+    known_title: Option<&str>,
+    warnings: &mut Vec<String>,
+) -> Vec<Section> {
     let mut sections: Vec<Section> = Vec::new();
     let mut current: Option<Section> = None;
     let mut skip_zone = false; // true while inside a skipped heading's body
+    let mut title_skipped = false; // only skip the first occurrence of the title
+
+    // If the document has real headings, don't pull pre-heading paragraphs
+    // (title, authors, affiliations) into an implicit section — they are front
+    // matter already captured by other extractors.
+    let has_headings = parsed
+        .paragraphs
+        .iter()
+        .any(|p| heading_level(&p.style).is_some());
 
     for para in &parsed.paragraphs {
         if let Some(level) = heading_level(&para.style) {
+            // Skip the title paragraph (already extracted separately)
+            if !title_skipped {
+                if let Some(title) = known_title {
+                    if para.text.trim() == title.trim() {
+                        title_skipped = true;
+                        continue;
+                    }
+                }
+            }
+
             // Skip meta-headings like Abstract (and their body paragraphs)
             if SKIP_HEADINGS
                 .iter()
@@ -56,8 +79,9 @@ pub fn extract_sections(parsed: &ParsedXml, warnings: &mut Vec<String>) -> Vec<S
             }
             match current.as_mut() {
                 Some(sec) if !para.text.is_empty() => sec.body.push(para.text.clone()),
-                None if !para.text.is_empty() => {
-                    // Body text before any heading — create implicit section
+                // Only collect pre-heading content into an implicit section when
+                // the document has no headings at all (e.g. a plain prose document).
+                None if !para.text.is_empty() && !has_headings => {
                     current = Some(Section {
                         heading: None,
                         level: 1,
@@ -112,7 +136,7 @@ mod tests {
             make(Some("Normal"), "Body text."),
         ]);
         let mut w = vec![];
-        let sections = extract_sections(&p, &mut w);
+        let sections = extract_sections(&p, None, &mut w);
         assert_eq!(sections.len(), 1);
         assert_eq!(sections[0].heading.as_deref(), Some("Introduction"));
         assert_eq!(sections[0].body, vec!["Body text."]);
@@ -127,7 +151,7 @@ mod tests {
             make(Some("Normal"), "N=100."),
         ]);
         let mut w = vec![];
-        let sections = extract_sections(&p, &mut w);
+        let sections = extract_sections(&p, None, &mut w);
         assert_eq!(sections.len(), 2);
         assert_eq!(sections[0].level, 1);
         assert_eq!(sections[1].level, 2);
@@ -140,7 +164,7 @@ mod tests {
             make(Some("Normal"), "Para two."),
         ]);
         let mut w = vec![];
-        let sections = extract_sections(&p, &mut w);
+        let sections = extract_sections(&p, None, &mut w);
         assert_eq!(sections.len(), 1);
         assert_eq!(sections[0].heading, None);
         assert_eq!(sections[0].body.len(), 2);
@@ -155,7 +179,7 @@ mod tests {
             make(Some("Normal"), "Intro body."),
         ]);
         let mut w = vec![];
-        let sections = extract_sections(&p, &mut w);
+        let sections = extract_sections(&p, None, &mut w);
         assert_eq!(sections.len(), 1);
         assert_eq!(sections[0].heading.as_deref(), Some("Introduction"));
     }

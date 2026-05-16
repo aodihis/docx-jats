@@ -13,10 +13,10 @@ pub fn extract_abstract(parsed: &ParsedXml, warnings: &mut Vec<String>) -> Optio
     // Strategy 1: style match
     for para in paras {
         if let Some(style) = &para.style {
-            if ABSTRACT_STYLES.iter().any(|s| style.eq_ignore_ascii_case(s)) {
-                if !para.text.is_empty() {
-                    return Some(para.text.clone());
-                }
+            if ABSTRACT_STYLES.iter().any(|s| style.eq_ignore_ascii_case(s))
+                && !para.text.is_empty()
+            {
+                return Some(para.text.clone());
             }
         }
     }

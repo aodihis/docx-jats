@@ -13,10 +13,12 @@ pub fn extract_docx(bytes: &[u8]) -> Result<RawDocx, AppError> {
     })?;
 
     let styles_xml = read_entry(&mut archive, "word/styles.xml").ok();
+    let core_xml = read_entry(&mut archive, "docProps/core.xml").ok();
 
     Ok(RawDocx {
         document_xml,
         styles_xml,
+        core_xml,
     })
 }
 

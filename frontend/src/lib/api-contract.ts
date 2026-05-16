@@ -4,8 +4,9 @@
  */
 
 export const API_ROUTES = {
-  health:  '/health',   // GET  → "ok"
-  convert: '/convert',  // POST → multipart/form-data { file: File } → ConvertResponse
+  health:     '/health',      // GET  → "ok"
+  convert:    '/convert',     // POST → multipart/form-data { file: File } → ConvertResponse
+  regenerate: '/regenerate',  // POST → JSON { document: DocumentContent } → RegenerateResponse
 } as const;
 
 export type ApiRoute = (typeof API_ROUTES)[keyof typeof API_ROUTES];
